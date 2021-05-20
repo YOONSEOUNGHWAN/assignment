@@ -110,36 +110,40 @@ int MOVE(Stack*En, Stack*De){
 }
 
 //enqueue 구현.
-void EnQueue(Queue*Q,int num){
+int EnQueue(Queue*Q,int num){
     int cnt=0; //이동횟수를 담을 변수 설정.
     //overflow가 일어날 경우. "overflow" 출력.
     if(isOverFlow(&Q->S1, &Q->S2)){
         printf("overflow\n");
-        return;
+        return 0;
     }
     //삽입하려는 스택이 가득 차 있는 경우, 삽입 스택의 원소를 출력 스택으로 이동.
     if(isFull(&Q->S1)){
         cnt=MOVE(&Q->S1, &Q->S2); //이동했을 경우, 이동횟수를 저장.
     }
+    //error발생시 cnt값 = -1, error가 발생했다는 의미로 1반환.
+    if(cnt ==-1) return 1;
     PUSH(&Q->S1, num); //삽입 O(1) 시간.
     printf("+ %d %d\n",num,cnt); // 삽입한 원소와 이동횟수 출력.
-    return;
+    return 0;
 }
 
 //dequeue 구현.
-void DeQueue(Queue*Q){
+int DeQueue(Queue*Q){
     int cnt=0; //이동횟수를 담을 변수 설정.
     //underflow가 일어날 경우. "underflow" 출력.
     if(isUnderFlow(&Q->S1, &Q->S2)){
         printf("underflow\n");
-        return;
+        return 0;
     }
     //출력 스택에 원소가 없을 경우, 삽입 스택의 원소를 출력 스택으로 이동.
     if(isEmpty(&Q->S2)){
         cnt=MOVE(&Q->S1, &Q->S2); //이동했을 경우, 이동횟수를 저장.
     }
+    //error발생시 cnt값 = -1, error가 발생했다는 의미로 1반환.
+    if(cnt==-1)return 1;
     printf("- %d %d\n",POP(&Q->S2),cnt);//출력 원소 POP, 이동횟수 출력.
-    return;
+    return 0;
 }
 
 void freeQueue(Queue *Q){
@@ -171,11 +175,19 @@ void mkQueue(Queue*Q){
             //EnQueue작업.
             case 'E':
                 scanf("%d%*c",&num);
-                EnQueue(Q, num);
+                //error발생시 동적할당 해제 후, 프로그램 종료.
+                if(EnQueue(Q, num)){
+                    freeQueue(Q);
+                    return;
+                };
                 break;
             //DeQueue작업.
             case 'D':
-                DeQueue(Q);
+                //error발생시 동적할당 해제 후, 프로그램 종료.
+                if(DeQueue(Q)){
+                    freeQueue(Q);
+                    return;
+                };
                 break;
             //예외처리.
             default:
